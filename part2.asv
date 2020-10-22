@@ -1,0 +1,64 @@
+clear all;
+clc;
+load Sample_1;
+rawData=Orig_Sig;
+numSamples = length(rawData);
+maxValue = max(rawData)*1.10;
+minValue = min(rawData)*0.90;
+
+ x = Orig_Sig
+ t = 1:3600
+ [b, a] = butter(11,0.15,'low');
+ filted = filtfilt(b,a,x);
+ 
+ thresholdedData = rawData;
+ [peaksY, peaksX] = findpeaks(filted);
+peak
+
+subplot(3,2,1);
+figure(1);
+plot(filted);
+title('filted')
+xlim([0 numSamples]);
+ylim([minValue maxValue]);
+
+
+
+
+
+
+%  fvtool(b,a);
+
+subplot(3,2,2);
+
+
+
+[b, a] = butter(11,0.12,'low')
+ filted = filtfilt(b,a,x) 
+ plot(t,x,'b-')  
+ hold on
+   plot(t,filted,'r-')  
+   hold off 
+   title('Time domain')
+ xlabel('Time')
+ ylabel('Voltage')
+ xlim([0 numSamples]);
+ylim([minValue maxValue]);
+ 
+
+
+subplot(3,2,3);
+
+ plot(filted) 
+xlim([0 numSamples]);
+ylim([minValue maxValue]);
+
+ hold on
+scatter(peaksX, peaksY, 'r'); 
+
+hold off
+   xlim([0 numSamples]);
+ylim([minValue maxValue]);
+   title('All peaks labled');
+
+
