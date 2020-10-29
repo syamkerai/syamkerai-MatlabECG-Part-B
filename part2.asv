@@ -1,6 +1,6 @@
 clear all
 clc
-load Sample_6.mat;
+load Sample_1.mat;
 rawData=Orig_Sig;
 numSamples = length(rawData);
 maxValue = max(rawData);
@@ -10,21 +10,19 @@ limBuffer = 100;
 maxYLim = maxValue + limBuffer;
 minYLim = minValue - limBuffer;
 % only consider peaks above the 70th percentile
-peakThresholdPct = 0.65;
-peakThreshold = minValue + ((maxValue - minValue) * peakThresholdPct);
-% increase window for more smoothing
-movMeanWindow = 10;
+peakProminence = (maxValue - minValue) * 0.5;
+peakThreshold = minValue + peakProminence;
 
 
 % use movmean to clean up spikes
-meanData = movmean(rawData, movMeanWindow); % 10 is moving window
-peakLocs = find(islocalmax(meanData) & meanData > peakThreshold);
-dipLocs = find(islocalmin(meanData));
+averagedData = movmean(rawData, 10);
+peakLocs = find(islocalmax(averagedData, 'MinProminence', peakProminence));
+dipLocs = find(islocalmin(averagedData));
 
 hold on 
-plot(rawData, 'b');
-plot([0, numSamples],[peakThreshold, peakThreshold], 'r--');
-plot(meanData, 'r--');
+plot(rawData);
+% plot([0, numSamples],[peakThreshold, peakThreshold], 'r--');
+plot(averagedData, ':');
 plot(peakLocs, rawData(peakLocs), 'r*');
 plot(dipLocs, rawData(dipLocs), 'b^');
 hold off
