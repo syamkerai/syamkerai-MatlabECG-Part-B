@@ -1,12 +1,12 @@
 clear all
 clc
-load Sample_6.mat;
+load Sample_1.mat;
 rawData=Orig_Sig;
 numSamples = length(rawData);
 maxValue = max(rawData);
 minValue = min(rawData);
 % add a buffer so graph doesn't touch the edges of preview window
-limBuffer = 100;
+limBuffer = 50;
 maxYLim = maxValue + limBuffer;
 minYLim = minValue - limBuffer;
 % only consider peaks above the 70th percentile
@@ -17,23 +17,19 @@ movMeanWindow = 10;
 
 
 % use movmean to clean up spikes
-meanData = movmean(rawData, movMeanWindow); % 10 is moving window
-peakLocs = find(islocalmax(meanData) & meanData > peakThreshold);
-dipLocs = find(islocalmin(meanData));
+d = designfilt('lowpassiir', 'FilterOrder', 2, 'HalfPowerFrequency' ,0.15, 'DesignMethod','butter');
+filteredData = filtfilt(d, rawData);
+% filteredData = movmean(rawData, movMeanWindow); % 10 is moving window
+peakLocs = find(islocalmax(filteredData) & filteredData > peakThreshold);
+dipLocs = find(islocalmin(filteredData));
 
 hold on 
-plot(rawData, 'b');
-plot([0, numSamples],[peakThreshold, peakThreshold], 'r--');
-plot(meanData, 'r--');
-plot(peakLocs, rawData(peakLocs), 'r*');
-plot(dipLocs, rawData(dipLocs), 'b^');
+plot(rawData, 'g--');
+plot([0, numSamples],[peakThreshold, peakThreshold], 'r:');
+plot(filteredData, 'b');
+plot(peakLocs, filteredData(peakLocs), 'rv');
+plot(dipLocs, filteredData(dipLocs), 'b^');
 hold off
 title('Analyzed ECG')
-xlim([0 numSamples]);
-ylim([minYLim maxYLim]);
-
-thresholdedData = rawData;
-[peaksY, peaksX] = findpeaks(thresholdedData);
-
-   
+axis([0 numSamples minYLim maxYLim])
 
