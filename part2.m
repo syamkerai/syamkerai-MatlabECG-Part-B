@@ -1,6 +1,6 @@
 clear all
 clc
-load Sample_2.mat;
+load Sample_1.mat;
 rawData=Orig_Sig;
 numSamples = length(rawData);
 maxValue = max(rawData);
