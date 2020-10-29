@@ -1,27 +1,30 @@
 clear all
 clc
-load Sample_1.mat;
+load Sample_2.mat;
 rawData=Orig_Sig;
 numSamples = length(rawData);
 maxValue = max(rawData);
 minValue = min(rawData);
-% add a buffer so graph doesn't touch the edges of preview window
 limBuffer = 50;
 maxYLim = maxValue + limBuffer;
 minYLim = minValue - limBuffer;
 % only consider peaks above the 70th percentile
+peakThresholdPct = 0.65;
 peakThresholdPct = 0.53;
 peakThreshold = minValue + ((maxValue - minValue) * peakThresholdPct);
+% increase window for more smoothing
+movMeanWindow = 10;
 
-% setting X-axis boundaries (converting to seconds)
-% set(gca,'XTick',[360 720 1080 1440 1800 2160 2520 2880 3240 3600] )
-% set(gca,'XTickLabel',[1 2 3 4 5 6 7 8 9 10 ] )
+
+% use movmean to clean up spikes
+d = designfilt('lowpassiir', 'FilterOrder', 2, 'HalfPowerFrequency' ,0.15, 'DesignMethod','butter');
 
 % use filtfilt to clean up spikes
 d = designfilt('lowpassiir', 'FilterOrder', 2, 'HalfPowerFrequency' ,0.08, 'DesignMethod','butter');
 filteredData = filtfilt(d, rawData);
 % filteredData = movmean(rawData, movMeanWindow); % 10 is moving window
 peakLocs = find(islocalmax(filteredData) & filteredData > peakThreshold);
+dipLocs = find(islocalmin(filteredData));
 valleyLocs = find(islocalmin(filteredData, 'MinProminence', 3));
 
 P_locs = [];
@@ -59,9 +62,8 @@ plot(T_locs, filteredData(T_locs), 'md', 'MarkerSize', 10);
 %plot(valleyLocs, filteredData(valleyLocs), 'b^');
 plot(rawData, 'g--');
 plot(filteredData, 'b');
-plot([0, numSamples],[peakThreshold, peakThreshold], 'r:');
 hold off;
-legend('P', 'Q', 'R', 'S', 'T', 'ECG Raw signal', 'Filtered Data', 'Threshold line')
+legend('P', 'Q', 'R', 'S', 'T', 'ECG Raw signal', 'Filtered Data')
 title('Analyzed ECG')
 axis([0 numSamples minYLim maxYLim])
 
