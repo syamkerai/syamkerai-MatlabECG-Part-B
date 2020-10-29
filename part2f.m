@@ -1,6 +1,6 @@
 clear all
 clc
-load Sample_1.mat;
+load Sample_2.mat;
 rawData=Orig_Sig;
 numSamples = length(rawData);
 maxValue = max(rawData);
@@ -10,10 +10,12 @@ limBuffer = 50;
 maxYLim = maxValue + limBuffer;
 minYLim = minValue - limBuffer;
 % only consider peaks above the 70th percentile
-peakThresholdPct = 0.53;
+peakThresholdPct = 0.50;
 peakThreshold = minValue + ((maxValue - minValue) * peakThresholdPct);
 
-
+% setting X-axis boundaries (converting to seconds)
+set(gca,'XTick',[360 720 1080 1440 1800 2160 2520 2880 3240 3600] )
+set(gca,'XTickLabel',[1 2 3 4 5 6 7 8 9 10 ] )
 
 % use filtfilt to clean up spikes
 d = designfilt('lowpassiir', 'FilterOrder', 2, 'HalfPowerFrequency' ,0.08, 'DesignMethod','butter');
@@ -31,7 +33,7 @@ T_locs = [];
 % loop through valley locations near peaks to assign P,Q,S,T
 peakIdx = 1;
 for valleyIdx = 2:length(valleyLocs)-2
-    P_loc = valleyLocs(valleyIdx - 1)
+    P_loc = valleyLocs(valleyIdx - 1);
     Q_loc = valleyLocs(valleyIdx);
     R_loc = peakLocs(peakIdx);
     S_loc = valleyLocs(valleyIdx + 1);
@@ -48,11 +50,11 @@ for valleyIdx = 2:length(valleyLocs)-2
 end
 
 hold on;
-plot(P_locs, filteredData(P_locs), 'mo');
-plot(Q_locs, filteredData(Q_locs), 'rs');
-plot(R_locs, filteredData(R_locs), 'rv');
-plot(S_locs, filteredData(S_locs), 'kx');
-plot(T_locs, filteredData(T_locs), 'cd');
+plot(P_locs, filteredData(P_locs), 'bo', 'MarkerSize', 10);
+plot(Q_locs, filteredData(Q_locs), 'rs', 'MarkerSize', 10);
+plot(R_locs, filteredData(R_locs), 'rv', 'MarkerSize', 10);
+plot(S_locs, filteredData(S_locs), 'kx', 'MarkerSize', 10);
+plot(T_locs, filteredData(T_locs), 'md', 'MarkerSize', 10);
 
 %plot(valleyLocs, filteredData(valleyLocs), 'b^');
 plot(rawData, 'g--');
@@ -67,8 +69,19 @@ axis([0 numSamples minYLim maxYLim])
 % heart rate calculation and display
 numPeaks = length(peakLocs);
 heartRate=(numPeaks * 60) / 10.0; % 60s in a min, 10s of samples
-
-PR_val = 0;
-QT_val = 0;
-QRS_dur = 0;
-fprintf('Heart rate analysis\nHeart rate: %0.2f[b/m]\nP-R interval: %0.2f[s]\nQ-T interval: %0.2f[s]\nQRS duration: %0.2f[s]\n', heartRate, PR_val, QT_val, QRS_dur);
+% P-R interval, QT-interval, QRS complex duration calculation
+% PR_val = mean(Q_locs-P_locs)*10./numSamples;
+% QT_val = mean(T_locs-Q_locs)*10./numSamples;
+% QRS_dur = mean(S_locs-Q_locs)*10./numSamples;
+% 
+% fprintf('Heart rate analysis\nHeart rate: %0.2f[b/m]\nP-R interval: %0.2f[s]\nQ-T interval: %0.2f[s]\nQRS duration: %0.2f[s]\n', heartRate, PR_val, QT_val, QRS_dur);
+% % inform the user about analysis
+% if PR_val<0.12 || PR_val>0.20
+%     fprintf('Your P-R interval is out of the normal range [0.12, 0.20] s\n')
+% end
+% if QT_val>=0.38
+%     fprintf('Your P-R interval is equal to or higher than 0.38 s\n')
+% end
+% if QRS_dur>0.1
+%     fprintf('Your QRS duration  is equal to or higher than 0.1 s\n')
+% end
