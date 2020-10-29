@@ -13,7 +13,9 @@ minYLim = minValue - limBuffer;
 peakThresholdPct = 0.53;
 peakThreshold = minValue + ((maxValue - minValue) * peakThresholdPct);
 
-
+% setting X-axis boundaries (converting to seconds)
+set(gca,'XTick',[360 720 1080 1440 1800 2160 2520 2880 3240 3600] )
+set(gca,'XTickLabel',[1 2 3 4 5 6 7 8 9 10 ] )
 
 % use filtfilt to clean up spikes
 d = designfilt('lowpassiir', 'FilterOrder', 2, 'HalfPowerFrequency' ,0.08, 'DesignMethod','butter');
