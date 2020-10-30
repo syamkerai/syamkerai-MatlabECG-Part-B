@@ -1,6 +1,6 @@
 clear all
 clc
-load Sample_1.mat;
+load Sample_4.mat;
 rawData=Orig_Sig;
 numSamples = length(rawData);
 maxValue = max(rawData);
@@ -16,7 +16,7 @@ peakThreshold = minValue + ((maxValue - minValue) * peakThresholdPct);
 d = designfilt('lowpassiir', 'FilterOrder', 2, 'HalfPowerFrequency' ,0.08, 'DesignMethod','butter');
 filteredData = filtfilt(d, rawData);
 peakLocs = find(islocalmax(filteredData) & filteredData > peakThreshold);
-valleyLocs = find(islocalmin(filteredData, 'MinProminence', 2));
+valleyLocs = find(islocalmin(filteredData));
 
 P_locs = [];
 Q_locs = [];
@@ -28,17 +28,10 @@ T_locs = [];
 peakIdx = 1;
 
 for valleyIdx = 1:length(valleyLocs)-1
-    if peakIdx > length(peakLocs)
-        break
-    end
-    % sometimes P_loc doesn't exist since there isn't a dip 
-    % assume the first value
-    P_loc = 1;
+    P_loc = 0;
     Q_loc = valleyLocs(valleyIdx);
     R_loc = peakLocs(peakIdx);
     S_loc = valleyLocs(valleyIdx + 1);
-    % sometimes P_loc doesn't exist since there isn't a dip 
-    % assume the the value
     T_loc = numSamples;
     
     if valleyIdx > 1
@@ -49,7 +42,7 @@ for valleyIdx = 1:length(valleyLocs)-1
         T_loc = valleyLocs(valleyIdx + 2);
     end
     
-    if Q_loc < R_loc && R_loc < S_loc
+    if Q_loc < R_loc && R_loc < S_loc && peakIdx <= length(peakLocs)
         peakIdx = peakIdx + 1;
         % add to locs array
         P_locs = [P_locs P_loc];
@@ -69,7 +62,7 @@ plot(T_locs, filteredData(T_locs), 'md', 'MarkerSize', 10);
 plot(rawData, 'g--');
 plot(filteredData, 'b');
 plot([0, numSamples],[peakThreshold, peakThreshold], 'r:');
-% plot(valleyLocs, filteredData(valleyLocs), 'b^');
+plot(valleyLocs, filteredData(valleyLocs), 'b^');
 
 hold off;
 legend('P', 'Q', 'R', 'S', 'T', 'ECG Raw signal', 'Filtered Data', 'Threshold line ')
